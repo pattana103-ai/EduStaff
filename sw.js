@@ -1,15 +1,12 @@
 // เปลี่ยนเลขเวอร์ชันทุกครั้งที่อัปเดตไฟล์ เพื่อล้างแคชเก่า
-const CACHE_NAME = 'hr-app-v1';
+const CACHE_NAME = 'hr-app-v2';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icon/icon.svg',
+  './icon/icon-maskable.svg'
 ];
 
 // ติดตั้ง: เก็บไฟล์หลักลงแคช (ถ้าบางไฟล์ไม่มีจะไม่ทำให้ล้ม)
