@@ -1,5 +1,5 @@
 // เปลี่ยนเลขเวอร์ชันทุกครั้งที่อัปเดตไฟล์ เพื่อล้างแคชเก่า
-const CACHE_NAME = 'hr-app-v2';
+const CACHE_NAME = 'hr-app-v3';
 
 const APP_SHELL = [
   './',

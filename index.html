@@ -78,6 +78,7 @@
     h2 { font-size: 1.35rem; }
     h3 { font-size: 1.08rem; }
     .hidden { display: none !important; }
+    body.ui-loading .app { visibility: hidden; }
     .muted { color: var(--muted); }
     .preline { white-space: pre-line; }
     .small { font-size: .86rem; }
@@ -597,7 +598,24 @@
   </style>
 </head>
 
-<body class="theme-default">
+<body class="theme-default ui-loading">
+  <script>
+    (function() {
+      try {
+        const cached = JSON.parse(localStorage.getItem('hr-app-ui-settings'));
+        const themes = ['default', 'purple', 'sky'];
+        const theme = cached && themes.includes(cached.theme)
+          ? cached.theme
+          : 'default';
+
+        document.body.classList.remove('theme-default', 'theme-purple', 'theme-sky');
+        document.body.classList.add('theme-' + theme);
+        document.body.classList.remove('ui-loading');
+      } catch (error) {
+        console.warn('ไม่สามารถใช้ธีมที่บันทึกในเครื่องได้', error);
+      }
+    })();
+  </script>
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
@@ -992,6 +1010,7 @@
     // ====================================================
 
     const $ = id => document.getElementById(id);
+    const UI_STORAGE_KEY = 'hr-app-ui-settings';
 
     const DEFAULT_UI = {
       font: 'Noto Sans Thai', primary: '#2563eb', fontSize: 15, radius: 20,
@@ -1130,6 +1149,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       try {
+        savedUI = readCachedUI();
+        currentUI = clone(savedUI);
         buildForms();
         buildAppearance();
         buildAdminTabs();
@@ -1324,7 +1345,9 @@
           );
 
           savedUI = normalizeUI(result.settings);
+          cacheUI(savedUI);
           applyUI(savedUI);
+          document.body.classList.remove('ui-loading');
           syncAppearance(savedUI);
           renderAll();
 
@@ -1342,6 +1365,7 @@
         } finally {
           setLoading(false);
           loadPromise = null;
+          document.body.classList.remove('ui-loading');
         }
       })();
 
@@ -1431,6 +1455,24 @@
       });
 
       return result;
+    }
+
+    function readCachedUI() {
+      try {
+        const raw = localStorage.getItem(UI_STORAGE_KEY);
+        return raw ? normalizeUI(JSON.parse(raw)) : clone(DEFAULT_UI);
+      } catch (error) {
+        console.warn('ไม่สามารถอ่านการตั้งค่ารูปลักษณ์ที่บันทึกในเครื่องได้', error);
+        return clone(DEFAULT_UI);
+      }
+    }
+
+    function cacheUI(settings) {
+      try {
+        localStorage.setItem(UI_STORAGE_KEY, JSON.stringify(normalizeUI(settings)));
+      } catch (error) {
+        console.warn('ไม่สามารถบันทึกการตั้งค่ารูปลักษณ์ในเครื่องได้', error);
+      }
     }
 
     function tint(hex) {
@@ -1598,6 +1640,7 @@
       try {
         const result = success(await rpc('saveUISettings', [settings, token], 45000));
         savedUI = normalizeUI(result.settings);
+        cacheUI(savedUI);
         applyUI(savedUI);
         syncAppearance(savedUI);
         toast(result.message, 'success', 'บันทึกรูปลักษณ์แล้ว');
